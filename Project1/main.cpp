@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
                 i++;
                 cout << mem[i-1] << "\n";
             }
-
+            
             write(fds[1], "done", 5);
             cout << "hello! i am child!" << endl;
             _exit(0);
