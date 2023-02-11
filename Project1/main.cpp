@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
         timer = stoi(argv[2]);
         cout << fileName << endl<< timer << endl;
     }
-
+    
     int fds[2];
     char buf[30];
     pid_t pid;
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
                 i++;
                 cout << mem[i-1] << "\n";
             }
-            
+
             write(fds[1], "done", 5);
             cout << "hello! i am child!" << endl;
             _exit(0);
