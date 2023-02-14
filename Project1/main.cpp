@@ -43,15 +43,15 @@ int main(int argc, char **argv) {
             if (!myFile)
                 cout << "File not found!" << endl;
 
-            int mem[2000];
+            int memory[2000];
             int i = 0;
             while (getline(myFile, x)){
                 if (x == "")
                     continue;
                 num = stoi(x);
-                mem[i] = num;
+                memory[i] = num;
+                cout << memory[i-1] << "\n";
                 i++;
-                cout << mem[i-1] << "\n";
             }
 
             write(fds[1], "done", 5);
