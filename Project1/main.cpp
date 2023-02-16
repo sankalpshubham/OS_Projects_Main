@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <stack>
+#include <time.h>
 
 using namespace std;
 
@@ -23,18 +24,18 @@ int main(int argc, char **argv) {
         cout << fileName << endl<< timer << endl;
     }
     
-    char buf[30];
+    char buf[30];                                   // empty variable here (REMOVE IT LATER)
     pid_t pid;
 
-    int fd1[2];                                     // two way communication using pipes
-    int fd2[2];
+    int fd1[2];                                     // chlid communication
+    int fd2[2];                                     // parent commnunication
 
     if (pipe(fd1) < 0 || pipe(fd2) < 0) {           // do a pipe and check if failed
         write(STDERR_FILENO, "Pipe failed\n", 12);
         exit(1);
     }
-
-    // start the fork -----
+    
+    // start the fork -------------------------
     pid = fork();
     if (pid == -1) {
         printf("The fork failed!");
@@ -60,6 +61,15 @@ int main(int argc, char **argv) {
             i++;
         }
 
+        i = 0;
+        int PC = 0;
+        int userSP = 999;
+        int systemSP = 1999;
+        while (PC != 50) {
+            read(fd1[0], &userSP, )
+        }
+
+
         write(fd1[1], "done", 5);
         cout << "hello! i am child!" << endl;
         _exit(0);
@@ -71,11 +81,13 @@ int main(int argc, char **argv) {
     } 
     else {                                        // parent process
         int PC, SP, IR, AC, X, Y;
+        PC = SP = IR = AC = X = Y = 0;
 
         cout << "I am parent!!\n";
         read(fd1[0], buf, 5);
-        cout << "PARENT: read \"" << buf << "\"\n";
-        waitpid(-1, NULL, 0);
+        
+
+        
 
 
         // create multiple switch case statements for CPU processing
@@ -181,6 +193,8 @@ int main(int argc, char **argv) {
 
 
 
+        cout << "PARENT: read \"" << buf << "\"\n";
+        waitpid(-1, NULL, 0);
     }
 
 
