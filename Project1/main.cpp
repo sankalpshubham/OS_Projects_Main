@@ -6,86 +6,119 @@
 #include <fstream>
 #include <stack>
 #include <time.h>
+#include <sstream>
+#include <string>
+#include <algorithm>
 
 using namespace std;
 
-int main(int argc, char **argv) {
-
-    string fileName;
-    int timer;
-
+int main(int argc, char *argv[]) {
     // check if the arguments are valid ----
-    if (argc == 1) {                
-        cout << "ERROR: No arguments inputed." << endl;
+    if (argc != 3) {                
+        cout << "ERROR: This program requires 2 arugments. Enter file name and timer interrupt." << endl;
         exit(1);
-    } else {
-        fileName = argv[1];
-        timer = stoi(argv[2]);
-        cout << fileName << endl<< timer << endl;
     }
-    
-    char buf[30];                                   // empty variable here (REMOVE IT LATER)
-    pid_t pid;
 
-    int fd1[2];                                     // chlid communication
-    int fd2[2];                                     // parent commnunication
+    // DELETE
+    // store the filename and interrupt timer inputs
+    // fileName = argv[1];
+    // timer = stoi(argv[2]);
+    // cout << fileName << endl << timer << endl;                                  // checking if the values are read in. (DELETE LATER !!!)
+    string fileName;
+    ifstream myFile(fileName);
+    if (!myFile) {
+        cout << "ERROR: File not found!" << endl;
+        exit(1);
+    }
 
-    if (pipe(fd1) < 0 || pipe(fd2) < 0) {           // do a pipe and check if failed
+
+    // setting up pipes for communication between child and parent process
+    int cpuToMemory[2];                                                         // parent communication
+    int memoryToCpu[2];                                                         // child commnunication
+
+    if (pipe(cpuToMemory) < 0 || pipe(memoryToCpu) < 0) {                       // do a pipe and check if it failed
         write(STDERR_FILENO, "Pipe failed\n", 12);
         exit(1);
     }
-    
+
+
     // start the fork -------------------------
-    pid = fork();
+    pid_t pid = fork();
     if (pid == -1) {
         printf("The fork failed!");
         exit(-1);
     }
-    else if (pid == 0) {                            // child process
-        int num;
-        string x;
-        ifstream myFile(fileName);
-        if (!myFile)
-            cout << "File not found!" << endl;
 
-        int memory[2000];
-        int i = 0;                                  // user programs needs to be stored from 0 - 999
-        while (getline(myFile, x)) {
-            if (x == "")
+    else if (pid == 0) {                    // child (memory) process
+        int memory[2000];                                                       // set up memory
+
+        int userPrgm = 0;                                                       // pointer to user and system program
+        int sysPrgm = 1000;
+
+        int currPtr = userPrgm;
+        string line;                                                            // read the lines of the file in the memory
+        while (getline(myFile, line)) {
+            if (line == "")
                 continue;
-            num = stoi(x);
-            memory[i] = num;
-            //cout << i << endl;
-            cout << memory[i] << "\n";
-            //cout << "-------" << endl;
-            i++;
+            
+            int currChar = 0;
+            char instruction[6] = {'\0', '\0', '\0', '\0', '\0', '\0'};
+
+            if (line[0] == '.') {                                               // processing a jump to address command
+                instruction[0] = '.';
+                currChar++;
+            }
+
+            while (isdigit(line[currChar])) {                                   // get the instruction number
+                instruction[currChar] = line[currChar];
+                currChar++;
+            }
+
+            if (instruction[0] == '.') {                                        // IF THIS rotate DOEST WORK THEN TRY THE FOR LOOP INSTEAD
+                rotate(instruction, instruction + 1, instruction + 6);          // removing the '.' from the array to process the command
+                instruction[5] = '\0';
+                currPtr = atoi(instruction);
+                cout << "Error occured here if there was one" << endl;                          // DELETE LATER !!!
+            } else if (isdigit(instruction[0])) {                               // process user command
+                memory[currPtr] = atoi(instruction);
+                currPtr++;
+            }
+            
         }
 
-        i = 0;
-        int PC = 0;
-        int userSP = 999;
-        int systemSP = 1999;
-        while (PC != 50) {
-            read(fd1[0], &userSP, )
+        // processing CPU read/write requests
+        while (true) {
+            char input[6] = {'\0', '\0', '\0', '\0', '\0', '\0'};
+
+            read(cpuToMemory[0], &input, 5);                                    // get instruction from CPU
+            char instr = input[0];
+
+            rotate(input, input + 1, input + 6);                            // MIGHT NEED TO CHANGE TO THE FOR LOOP TO GET THE INST !!!
+            input[5] = '\0';
+
+            if (instr == 'r') {                                                 // process the read command
+                char convertToStr[5];
+                snprintf(convertToStr, 5, "%d", memory[atoi(input)]);
+                write(memoryToCpu[1], &convertToStr, 4);
+            }
+
+            if (instr == 'w') {
+                char writeValue[5];
+                read(cpuToMemory[0], &writeValue, 4);
+                memory[atoi(input)] = atoi(writeValue);
+            }
+
+            if (instr == 'e')
+                exit(0);
+            
         }
 
-
-        write(fd1[1], "done", 5);
-        cout << "hello! i am child!" << endl;
-        _exit(0);
+    }   // ----------- end of child ------------
 
 
-        
-
-
-    } 
-    else {                                        // parent process
+    else {                              // parent (cpu) process
         int PC, SP, IR, AC, X, Y;
-        PC = SP = IR = AC = X = Y = 0;
-
-        cout << "I am parent!!\n";
-        read(fd1[0], buf, 5);
-        
+        int timer = atoi(argv[2]);
 
         
 
