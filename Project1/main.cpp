@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
             snprintf(buffer, 10, "r%d", PC);                                                        // get next instruction from memory
 			write(cpuToMemory[1], &buffer, 5);
 			read(memoryToCpu[0], &instruction, 4);
-			instCount++;
+			instCount++; 
 
             if (instruction[0] == '\0') {                                                           // if didn't get the instruction
                 continue;
