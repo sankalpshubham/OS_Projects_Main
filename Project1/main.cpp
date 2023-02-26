@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     // cout << fileName << endl << timer << endl;                                  // checking if the values are read in. (DELETE LATER !!!)
     //Seed for random number
 	srand(time(0));                                 // CAN THIS BE PLACED SOMEWHERE ELSE ????
-    string fileName;
+    string fileName = argv[1];;
     ifstream myFile(fileName);
     if (!myFile) {
         cout << "ERROR: File not found!" << endl;
@@ -185,14 +185,14 @@ int main(int argc, char *argv[]) {
 
             // create multiple switch case statements for CPU processing
             switch (IR) {
-                case 1:                                                                             // Load the value into the AC
+                case 1: {                                                                            // Load the value into the AC
 					PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
 					read(memoryToCpu[0], &readFromMem, 4);
 					AC = atoi(readFromMem);
-                
-                case 2:                                                                             // Load the value at the address into the AC
+                }
+                case 2: {                                                                            // Load the value at the address into the AC
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);                                    // get next line                   
 					write(cpuToMemory[1], &buffer, 5);
@@ -206,8 +206,8 @@ int main(int argc, char *argv[]) {
 						read(memoryToCpu[0], &readFromMem, 4);
 						AC = atoi(readFromMem);
 					}
-                
-                case 3:                                                                             // Load the value from the address found in the given address into the AC
+                }
+                case 3: {                                                                             // Load the value from the address found in the given address into the AC
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);                                    // reading next line
 					write(cpuToMemory[1], &buffer, 5);
@@ -230,8 +230,8 @@ int main(int argc, char *argv[]) {
 							AC = atoi(readFromMem);
 						}
 					}
-                
-                case 4:                                                                             // Load the value at (address+X) into the AC
+                }
+                case 4: {                                                                             // Load the value at (address+X) into the AC
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);                                    // get next line
 					write(cpuToMemory[1], &buffer, 5);
@@ -245,8 +245,8 @@ int main(int argc, char *argv[]) {
 						read(memoryToCpu[0], &readFromMem, 4);
 						AC = atoi(readFromMem);
 					}
-                
-                case 5:                                                                             // Load the value at (address+Y) into the AC
+                }
+                case 5: {                                                                            // Load the value at (address+Y) into the AC
                     PC++;
                     snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -255,13 +255,13 @@ int main(int argc, char *argv[]) {
 					if (Y + atoi(readFromMem) > 999 && user)
 						printf("Memory violation: accessing system address %d in user mode.\n", atoi(readFromMem));
 					else {                                                              // load new value in AC
-						snprintf(buffer, 10, "r%d", y + atoi(readFromMem));
+						snprintf(buffer, 10, "r%d", Y + atoi(readFromMem));
 						write(cpuToMemory[1], &buffer, 5);
 						read(memoryToCpu[0], &readFromMem, 4);
 						AC = atoi(readFromMem);
 					}
-                
-                case 6:                                                                             // Load from (Sp+X) into the AC (if SP is 990, and X is 1, load from 991)
+                }
+                case 6: {                                                                            // Load from (Sp+X) into the AC (if SP is 990, and X is 1, load from 991)
                     if (X + SP > 999 && !interrupt)
 						printf("Memory violation: accessing system address %d in user mode.\n", atoi(readFromMem));
 					else {                                                              // load new value in AC
@@ -270,8 +270,8 @@ int main(int argc, char *argv[]) {
 						read(memoryToCpu[0], &readFromMem, 4);
 						AC = atoi(readFromMem);
 					}
-                
-                case 7:                                                                             // Store the value in the AC into the address
+                }
+                case 7: {                                                                            // Store the value in the AC into the address
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -281,11 +281,11 @@ int main(int argc, char *argv[]) {
 					write(cpuToMemory[1], &buffer, 5);
 					snprintf(buffer, 10, "%d", AC);
 					write(cpuToMemory[1], &buffer, 4);
-                
-                case 8:                                                                             // Gets a random int from 1 to 100 into the AC
+                }
+                case 8:                                                                            // Gets a random int from 1 to 100 into the AC
                     AC = (rand() % 100) + 1;
                 
-                case 9:                                                                             // If port=1, writes AC as an int to the screen. If port=2, writes AC as a char to the screen
+                case 9: {                                                                            // If port=1, writes AC as an int to the screen. If port=2, writes AC as a char to the screen
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -295,7 +295,7 @@ int main(int argc, char *argv[]) {
 						printf("%d", AC);
 					if (atoi(readFromMem) == 2)
 						printf("%c", AC);
-                
+                }
                 case 10:                                                                            // Add the value in X to the AC
                     AC += X;
                 
@@ -326,7 +326,7 @@ int main(int argc, char *argv[]) {
                 case 19:                                // Copy the value in SP to the AC 
                     AC = SP;
                 
-                case 20:                                // Jump to the address
+                case 20: {                               // Jump to the address
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -334,8 +334,8 @@ int main(int argc, char *argv[]) {
 
 					PC = atoi(readFromMem);
 					jump = true;
-                
-                case 21:                                                                            // Jump to the address only if the value in the AC is zero
+                }
+                case 21: {                                                                            // Jump to the address only if the value in the AC is zero
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -345,8 +345,8 @@ int main(int argc, char *argv[]) {
 						PC = atoi(readFromMem);
 						jump = true;
 					}
-                
-                case 22:                                                                            // Jump to the address only if the value in the AC is not zero
+                }
+                case 22: {                                                                            // Jump to the address only if the value in the AC is not zero
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -356,8 +356,8 @@ int main(int argc, char *argv[]) {
 						PC = atoi(readFromMem);
 						jump = true;
 					}
-                
-                case 23:                                                                            // Push return address onto stack, jump to the address
+                }
+                case 23: {                                                                            // Push return address onto stack, jump to the address
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -371,8 +371,8 @@ int main(int argc, char *argv[]) {
                     SP--;
 					PC = atoi(readFromMem);
 					jump = true;
-                
-                case 24:                                                                            // Pop return address from the stack, jump to the address
+                }
+                case 24: {                                                                            // Pop return address from the stack, jump to the address
                     SP++;
 					snprintf(buffer, 10, "r%d", SP);
 					write(cpuToMemory[1], &buffer, 5);
@@ -380,28 +380,28 @@ int main(int argc, char *argv[]) {
 
 					PC = atoi(readFromMem);
 					jump = true;
-                
+                }
                 case 25:                                                                            // Increment the value in X
                     X++;
                 
                 case 26:                                                                            // Decrement the value in X
                     X--;
                 
-                case 27:                                                                            // Push AC onto stack
+                case 27: {                                                                            // Push AC onto stack
 					snprintf(buffer, 10, "w%d", SP);
 					write(cpuToMemory[1], &buffer, 5);
 					snprintf(buffer, 10, "%d", AC);
 					write(cpuToMemory[1], &buffer, 4);
 					SP--;
-                
-                case 28:                                                                            // Pop from stack into AC
+                }
+                case 28: {                                                                            // Pop from stack into AC
                     SP++;
 					snprintf(buffer, 10, "r%d", SP);
 					write(cpuToMemory[1], &buffer, 5);
 					read(memoryToCpu[0], &readFromMem, 4);
 					AC = atoi(readFromMem);
-                
-                case 29:                                                                            // Perform system call
+                }
+                case 29: {                                                                            // Perform system call
 					user = false;                                       // setting kernel/interrupt mode
 					interrupt = true;   
 
@@ -422,8 +422,8 @@ int main(int argc, char *argv[]) {
 					snprintf(buffer, 10, "%d", userPC);
 					write(cpuToMemory[1], &buffer, 4);
 					SP--;
-                
-                case 30:                                                                            // Return from system call
+                }
+                case 30: {                                                                            // Return from system call
                     user = true;
 					interrupt = false;
 					SP++;
@@ -440,8 +440,8 @@ int main(int argc, char *argv[]) {
 					write(cpuToMemory[1], &buffer, 5);
 					read(memoryToCpu[0], &readFromMem, 4);
 					SP = atoi(readFromMem);                             // read the jump into SP
-                
-                case 50:                                                                            // End execution
+                }
+                case 50: {                                                                          // End execution
                     cout << "Program executed successfully" << endl;
 
                     write(cpuToMemory[1], "e", 5);                      // close all pipes (communications) before exiting
@@ -451,10 +451,12 @@ int main(int argc, char *argv[]) {
 					close(memoryToCpu[1]);
 
                     exit(0);
-                
-                default:                                                                            // ERROR because some invalid IR
+                }
+
+                default: {                                                                           // ERROR because some invalid IR
                     cout << "ERROR. Invalid IR" << endl;
                     exit(1);
+                }
             }   // end of switch cases
 
             if (!jump)
