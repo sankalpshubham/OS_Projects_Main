@@ -13,8 +13,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    // check if the arguments are valid ----
-    if (argc != 3) {                
+    if (argc != 3) {                                                                            // check if the arguments are valid ----
         cout << "ERROR: This program requires 2 arugments. Enter file name and timer interrupt." << endl;
         exit(1);
     }
@@ -25,6 +24,7 @@ int main(int argc, char *argv[]) {
     // timer = stoi(argv[2]);
     // cout << fileName << endl << timer << endl;                                  // checking if the values are read in. (DELETE LATER !!!)
     //Seed for random number
+
 	srand(time(0));                                 // CAN THIS BE PLACED SOMEWHERE ELSE ????
     string fileName = argv[1];;
     ifstream myFile(fileName);
@@ -53,11 +53,10 @@ int main(int argc, char *argv[]) {
 
     else if (pid == 0) {                    // child (memory) process
         int memory[2000];                                                       // set up memory
-
         int userPrgm = 0;                                                       // pointer to user and system program
         int sysPrgm = 1000;
-
         int currPtr = userPrgm;
+
         string line;                                                            // read the lines of the file in the memory
         while (getline(myFile, line)) {
             if (line == "")
@@ -75,16 +74,21 @@ int main(int argc, char *argv[]) {
                 instruction[currChar] = line[currChar];
                 currChar++;
             }
-
+            
             if (instruction[0] == '.') {                                        // IF THIS rotate DOEST WORK THEN TRY THE FOR LOOP INSTEAD !!!!!
-                rotate(instruction, instruction + 1, instruction + 6);          // removing the '.' from the array to process the command
-                instruction[5] = '\0';
+                //rotate(instruction, instruction + 1, instruction + 6);          // removing the '.' from the array to process the command
+                //instruction[5] = '\0';
+                
+                for (int i = 0; i < 5; i++)
+				    instruction[i] = instruction[i + 1];
                 currPtr = atoi(instruction);
-                cout << "Error occured here if there was one" << endl;                                      // DELETE LATER !!!
+                //cout << "Error occured here if there was one" << endl;                                      // DELETE LATER !!!
             } else if (isdigit(instruction[0])) {                               // process user command
                 memory[currPtr] = atoi(instruction);
                 currPtr++;
             }
+            //cout << "This is instruction array " << instruction << endl;
+            //cout << "currPtr " << currPtr << endl;
             
         }
 
@@ -95,8 +99,10 @@ int main(int argc, char *argv[]) {
             read(cpuToMemory[0], &input, 5);                                    // get instruction from CPU
             char instr = input[0];
 
-            rotate(input, input + 1, input + 6);                            // MIGHT NEED TO CHANGE TO THE FOR LOOP TO GET THE INST !!!
-            input[5] = '\0';
+            // rotate(input, input + 1, input + 6);                            // MIGHT NEED TO CHANGE TO THE FOR LOOP TO GET THE INST !!!
+            // input[5] = '\0';
+            for (int i = 0; i < 5; i++)
+				input[i] = input[i + 1];
 
             if (instr == 'r') {                                                 // process the read command
                 char convertToStr[5];
@@ -180,12 +186,13 @@ int main(int argc, char *argv[]) {
             }
             
             IR = atoi(instruction);
-            char readFromMem[5];            // THIS IS INSIDE EVERY SWITCH BUT IM TRYING OUTSIDE TO SEE IF IT MAKES A DIFFERENCE !!!!!!*****************************8
+                        // THIS IS INSIDE EVERY SWITCH BUT IM TRYING OUTSIDE TO SEE IF IT MAKES A DIFFERENCE !!!!!!*****************************8
 
 
             // create multiple switch case statements for CPU processing
             switch (IR) {
                 case 1: {                                                                            // Load the value into the AC
+                    char readFromMem[5];
 					PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -193,6 +200,7 @@ int main(int argc, char *argv[]) {
 					AC = atoi(readFromMem);
                 }
                 case 2: {                                                                            // Load the value at the address into the AC
+                    char readFromMem[5];
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);                                    // get next line                   
 					write(cpuToMemory[1], &buffer, 5);
@@ -208,6 +216,7 @@ int main(int argc, char *argv[]) {
 					}
                 }
                 case 3: {                                                                             // Load the value from the address found in the given address into the AC
+                    char readFromMem[5];
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);                                    // reading next line
 					write(cpuToMemory[1], &buffer, 5);
@@ -232,6 +241,7 @@ int main(int argc, char *argv[]) {
 					}
                 }
                 case 4: {                                                                             // Load the value at (address+X) into the AC
+                    char readFromMem[5];
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);                                    // get next line
 					write(cpuToMemory[1], &buffer, 5);
@@ -247,6 +257,7 @@ int main(int argc, char *argv[]) {
 					}
                 }
                 case 5: {                                                                            // Load the value at (address+Y) into the AC
+                    char readFromMem[5];
                     PC++;
                     snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -262,6 +273,7 @@ int main(int argc, char *argv[]) {
 					}
                 }
                 case 6: {                                                                            // Load from (Sp+X) into the AC (if SP is 990, and X is 1, load from 991)
+                    char readFromMem[5];    
                     if (X + SP > 999 && !interrupt)
 						printf("Memory violation: accessing system address %d in user mode.\n", atoi(readFromMem));
 					else {                                                              // load new value in AC
@@ -272,6 +284,7 @@ int main(int argc, char *argv[]) {
 					}
                 }
                 case 7: {                                                                            // Store the value in the AC into the address
+                    char readFromMem[5];
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -284,17 +297,21 @@ int main(int argc, char *argv[]) {
                 }
                 case 8:                                                                            // Gets a random int from 1 to 100 into the AC
                     AC = (rand() % 100) + 1;
+                    cout << AC << endl;
                 
                 case 9: {                                                                            // If port=1, writes AC as an int to the screen. If port=2, writes AC as a char to the screen
+                    char readFromMem[5];
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
 					read(memoryToCpu[0], &readFromMem, 4);
 
 					if (atoi(readFromMem) == 1)                                         // check port value
-						printf("%d", AC);
+                        cout << AC << endl;
+						//printf("%d", AC);
 					if (atoi(readFromMem) == 2)
-						printf("%c", AC);
+                        cout << char(AC) << endl;
+						//printf("%c", AC);
                 }
                 case 10:                                                                            // Add the value in X to the AC
                     AC += X;
@@ -327,6 +344,7 @@ int main(int argc, char *argv[]) {
                     AC = SP;
                 
                 case 20: {                               // Jump to the address
+                    char readFromMem[5];
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -336,6 +354,7 @@ int main(int argc, char *argv[]) {
 					jump = true;
                 }
                 case 21: {                                                                            // Jump to the address only if the value in the AC is zero
+                    char readFromMem[5];
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -347,6 +366,7 @@ int main(int argc, char *argv[]) {
 					}
                 }
                 case 22: {                                                                            // Jump to the address only if the value in the AC is not zero
+                    char readFromMem[5];
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -358,6 +378,7 @@ int main(int argc, char *argv[]) {
 					}
                 }
                 case 23: {                                                                            // Push return address onto stack, jump to the address
+                    char readFromMem[5];
                     PC++;
 					snprintf(buffer, 10, "r%d", PC);
 					write(cpuToMemory[1], &buffer, 5);
@@ -373,6 +394,7 @@ int main(int argc, char *argv[]) {
 					jump = true;
                 }
                 case 24: {                                                                            // Pop return address from the stack, jump to the address
+                    char readFromMem[5];
                     SP++;
 					snprintf(buffer, 10, "r%d", SP);
 					write(cpuToMemory[1], &buffer, 5);
@@ -395,6 +417,7 @@ int main(int argc, char *argv[]) {
 					SP--;
                 }
                 case 28: {                                                                            // Pop from stack into AC
+                    char readFromMem[5];
                     SP++;
 					snprintf(buffer, 10, "r%d", SP);
 					write(cpuToMemory[1], &buffer, 5);
@@ -402,6 +425,9 @@ int main(int argc, char *argv[]) {
 					AC = atoi(readFromMem);
                 }
                 case 29: {                                                                            // Perform system call
+                    if (interrupt) {
+                        break;
+                    }
 					user = false;                                       // setting kernel/interrupt mode
 					interrupt = true;   
 
@@ -424,6 +450,7 @@ int main(int argc, char *argv[]) {
 					SP--;
                 }
                 case 30: {                                                                            // Return from system call
+                    char readFromMem[5];
                     user = true;
 					interrupt = false;
 					SP++;
@@ -442,13 +469,15 @@ int main(int argc, char *argv[]) {
 					SP = atoi(readFromMem);                             // read the jump into SP
                 }
                 case 50: {                                                                          // End execution
-                    cout << "Program executed successfully" << endl;
-
+                    
                     write(cpuToMemory[1], "e", 5);                      // close all pipes (communications) before exiting
 					close(cpuToMemory[0]);
 					close(cpuToMemory[1]);
 					close(memoryToCpu[0]);
 					close(memoryToCpu[1]);
+
+                    cout << "Program executed successfully" << endl;
+
 
                     exit(0);
                 }
