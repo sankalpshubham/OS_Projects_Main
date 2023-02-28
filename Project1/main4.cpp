@@ -8,7 +8,6 @@
 #include <time.h>
 #include <sstream>
 #include <string>
-#include <algorithm>
 
 using namespace std;
 
@@ -20,27 +19,15 @@ const int WRITE_MEM_FLAG = -9;
 
 void push_or_pop_stack(int fd1, int fd2, int *mem, int operation) {
     int value;
-    int stack;
-    read(fd2, &value, sizeof(value));
-    stack = value;
+    int stackPtr;
+    read(fd2, &stackPtr, sizeof(stackPtr));
 
-    // if (operation == SYS_STACK_FLAG) {
-    //     read(fd, &value, sizeof(value));
-    //     mem[stack] = value;
-    // } else {
-    //     value = stack;
-    // }
-    //read(fd, &value, sizeof(value));
-    //mem[stack] = value;
-    //read(memoryToCpu[0], &PC, sizeof(PC));        FIRST READ INSIDE THE WHILE
-    //push_or_pop_stack(cpuToMemory[1], memoryToCpu[0], mem, PC); THIS IS CALLING THE FUNCTIONS
-
-    if (mem[stack] == -1) {  // Push
+    if (mem[stackPtr] == -1) {  // Push
         read(fd2, &value, sizeof(value));
-        mem[stack] = value;
+        mem[stackPtr] = value;
     } else {  // Pop
-        write(fd1, &mem[stack], sizeof(mem[stack]));         // NEEED TO WRITE TO cpuToMemory
-        mem[stack] = -1;
+        write(fd1, &mem[stackPtr], sizeof(mem[stackPtr]));
+        mem[stackPtr] = -1;
     }
 }
 
@@ -69,8 +56,8 @@ int main(int argc, char *argv[]) {
 
 
     // setting up pipes for communication between child and parent process
-    int cpuToMemory[2];                                                         // parent communication
-    int memoryToCpu[2];                                                         // child commnunication
+    int cpuToMemory[2];
+    int memoryToCpu[2];
 
     if (pipe(cpuToMemory) < 0 || pipe(memoryToCpu) < 0) {                       // do a pipe and check if it failed
         write(STDERR_FILENO, "Pipe failed\n", 12);
@@ -86,11 +73,6 @@ int main(int argc, char *argv[]) {
     }
 
 
-
-
-
-    // **************** Change Start here ************************
-
     else if (pid == 0) {                    // child (memory) process
         close(cpuToMemory[0]);  // Close file descriptors
         close(memoryToCpu[1]);
@@ -100,7 +82,6 @@ int main(int argc, char *argv[]) {
         int i = 0;
         string line;
         while (getline(myFile, line)) {
-            //cout << "printing from READING FILE in CHILD" << endl;
             if (isdigit(line[0])) {
                 mem[i++] = stoi(line);
             } else if (line[0] == '.') {
@@ -108,63 +89,10 @@ int main(int argc, char *argv[]) {
             }
         }
 
-
-        // int PC, stack;
-        // while (true)
-        // {
-        //     read(memoryToCpu[0], &PC, sizeof(PC));
-        //     //cout << "printing from STACK ADJUSTMENT in CHILD" << endl;
-        //     switch (PC) {
-        //     case -11: // system stack
-        //         read(memoryToCpu[0], &stack, sizeof(stack));
-
-        //         if (mem[stack] == -1) { // push to system stack
-        //             read(memoryToCpu[0], &PC, sizeof(PC));
-        //             mem[stack] = PC;
-        //         }
-        //         else { // pop from system stack
-        //             write(cpuToMemory[1], &mem[stack], sizeof(mem[stack]));
-        //             mem[stack] = -1;
-        //         }
-
-        //         continue;
-
-        //     case -10: // user stack
-        //         read(memoryToCpu[0], &stack, sizeof(stack));
-
-        //         if (mem[stack] == -1) { // push to user stack
-        //             read(memoryToCpu[0], &PC, sizeof(PC));
-        //             mem[stack] = PC;
-        //         }
-        //         else { // pop from user stack
-        //             write(cpuToMemory[1], &mem[stack], sizeof(mem[stack]));
-        //             mem[stack] = -1;
-        //         }
-
-        //         continue;
-
-        //     case -9: // write to memory location
-        //         read(memoryToCpu[0], &stack, sizeof(stack));
-        //         read(memoryToCpu[0], &PC, sizeof(PC));
-        //         mem[stack] = PC;
-        //         continue;
-
-        //     default: // execute instruction
-        //         write(cpuToMemory[1], &mem[PC], sizeof(mem[PC]));
-
-        //         if (mem[PC] == 50)
-        //         {
-        //             break;
-        //         }
-        //     }
-        // }
-        // ------------------------- WRONG SECTION ------------------
         int PC;
         int stack;
         while (true) {
-            //cout << "printing from STACK ADJUSTMENT in CHILD" << endl;
             read(memoryToCpu[0], &PC, sizeof(PC));
-            //cout << "PC: " << PC << endl;
             if (PC == SYS_STACK_FLAG || PC == USER_STACK_FLAG) {  // Access stack
                 push_or_pop_stack(cpuToMemory[1], memoryToCpu[0], mem, PC);
                 continue;
@@ -178,7 +106,6 @@ int main(int argc, char *argv[]) {
                 break;
             }
         }
-        // ------------------------- WRONG SECTION ------------------
 
         _exit(0);
 
@@ -198,8 +125,6 @@ int main(int argc, char *argv[]) {
         srand((unsigned int)time(NULL));
 
         while (IR != 50) {
-            //cout << "printing from CPU" << endl;
-            //cout << "PC: " << PC << endl;
             if (intr && count > 0 && (count % timer) == 0) {
                 intrCount++;
             }
@@ -222,14 +147,9 @@ int main(int argc, char *argv[]) {
                 write(memoryToCpu[1], &PC, sizeof(PC));
                 PC = 1000;
             }
-            //cout << "PC BEFORE WRITE: " << PC << endl;
+            
             write(memoryToCpu[1], &PC, sizeof(PC));
-            //cout << "PC after WRITE: " << PC << endl;
-
-            //cout << "----Timer----: " << timer << endl;
-
             read(cpuToMemory[0], &IR, sizeof(IR));
-            //cout << "IR: " << IR << endl;
             count++;
 
             switch (IR) {
@@ -256,7 +176,8 @@ int main(int argc, char *argv[]) {
 
                 case 3: // Load the value from the address found in the given address into the AC
                         // (for example, if LoadInd 500, and 500 contains 100, then load from 100).
-                    break;
+                    // WRITE CASE # HERE
+                        break;
 
                 case 4: // Load the value at (address+X) into the AC
                         // (for example, if LoadIdxX 500, and X contains 10, then load from 510).
