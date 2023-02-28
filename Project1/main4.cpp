@@ -18,10 +18,11 @@ const int SYS_STACK_FLAG = -11;
 const int USER_STACK_FLAG = -10;
 const int WRITE_MEM_FLAG = -9;
 
-void push_or_pop_stack(int fd, int *mem, int operation) {
+void push_or_pop_stack(int fd1, int fd2, int *mem, int operation) {
     int value;
     int stack;
-    read(fd, &stack, sizeof(value));
+    read(fd2, &value, sizeof(value));
+    stack = value;
 
     // if (operation == SYS_STACK_FLAG) {
     //     read(fd, &value, sizeof(value));
@@ -31,12 +32,14 @@ void push_or_pop_stack(int fd, int *mem, int operation) {
     // }
     //read(fd, &value, sizeof(value));
     //mem[stack] = value;
-    
+    //read(memoryToCpu[0], &PC, sizeof(PC));        FIRST READ INSIDE THE WHILE
+    //push_or_pop_stack(cpuToMemory[1], memoryToCpu[0], mem, PC); THIS IS CALLING THE FUNCTIONS
+
     if (mem[stack] == -1) {  // Push
-        read(fd, &value, sizeof(value));
+        read(fd2, &value, sizeof(value));
         mem[stack] = value;
     } else {  // Pop
-        write(fd, &mem[stack], sizeof(mem[stack]));
+        write(fd1, &mem[stack], sizeof(mem[stack]));         // NEEED TO WRITE TO cpuToMemory
         mem[stack] = -1;
     }
 }
@@ -163,7 +166,7 @@ int main(int argc, char *argv[]) {
             read(memoryToCpu[0], &PC, sizeof(PC));
             //cout << "PC: " << PC << endl;
             if (PC == SYS_STACK_FLAG || PC == USER_STACK_FLAG) {  // Access stack
-                push_or_pop_stack(memoryToCpu[0], mem, PC);
+                push_or_pop_stack(cpuToMemory[1], memoryToCpu[0], mem, PC);
                 continue;
             }
             if (PC == WRITE_MEM_FLAG) {  // Write to memory location
@@ -221,7 +224,7 @@ int main(int argc, char *argv[]) {
             }
             //cout << "PC BEFORE WRITE: " << PC << endl;
             write(memoryToCpu[1], &PC, sizeof(PC));
-            cout << "PC after WRITE: " << PC << endl;
+            //cout << "PC after WRITE: " << PC << endl;
 
             //cout << "----Timer----: " << timer << endl;
 
@@ -391,9 +394,9 @@ int main(int argc, char *argv[]) {
                 case 24: // Pop return address from the stack, jump to the address
                     write(memoryToCpu[1], &uin, sizeof(uin));
                     write(memoryToCpu[1], &SP, sizeof(SP));
-                    cout << "Did the writing ---------------------------" << endl;
+                    //cout << "Did the writing ---------------------------" << endl;
                     read(cpuToMemory[0], &op, sizeof(op));
-                    cout << "DID THE READ" << endl;
+                    //cout << "DID THE READ" << endl;
                     PC = op;
                     SP++;
                     break;
