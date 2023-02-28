@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
 
     // start the fork -------------------------
-    pid_t pid = fork();
+    int pid = fork();
     if (pid == -1) {
         printf("The fork failed!");
         exit(-1);
@@ -76,19 +76,13 @@ int main(int argc, char *argv[]) {
             }
             
             if (instruction[0] == '.') {                                        // IF THIS rotate DOEST WORK THEN TRY THE FOR LOOP INSTEAD !!!!!
-                //rotate(instruction, instruction + 1, instruction + 6);          // removing the '.' from the array to process the command
-                //instruction[5] = '\0';
+                rotate(instruction, instruction + 1, instruction + 6);          // removing the '.' from the array to process the command
+                instruction[5] = '\0';
                 
-                for (int i = 0; i < 5; i++)
-				    instruction[i] = instruction[i + 1];
-                currPtr = atoi(instruction);
-                //cout << "Error occured here if there was one" << endl;                                      // DELETE LATER !!!
             } else if (isdigit(instruction[0])) {                               // process user command
                 memory[currPtr] = atoi(instruction);
                 currPtr++;
             }
-            //cout << "This is instruction array " << instruction << endl;
-            //cout << "currPtr " << currPtr << endl;
             
         }
 
