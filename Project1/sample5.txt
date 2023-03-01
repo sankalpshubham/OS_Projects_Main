@@ -1,0 +1,71 @@
+1 // Load 0
+0
+14 // CopyToX
+4 // LoadIdxX 32 (load from A-Z table)
+32
+21 // JumpIfEqual 12
+12
+25 // DecX (decrement X before outputting)
+9 // Put 2 (output as char)
+2
+20 // Jump 3
+3
+1 // Load 0
+0
+16 // CopyToY
+5 // LoadIdxY 59 (load from 1-10 table)
+59
+21 // JumpIfEqual 27
+27
+11 // AddY (increment Y before outputting)
+9 // Put 1 (output as int)
+1
+16 // CopyToY
+20 // Jump 15
+15
+1 // Print newline
+10
+9
+2
+50 // End
+90 // Data A-Z in reverse order
+89
+88
+87
+86
+85
+84
+83
+82
+81
+80
+79
+78
+77
+76
+75
+74
+73
+72
+71
+70
+69
+68
+67
+66
+65
+0
+10 // Data 0-9 in reverse order
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+
+.1000
+30

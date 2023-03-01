@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
         int intrCount = 0, count = 0, userSP = 0;
 
         srand((unsigned int)time(NULL));
-
+        
         while (IR != 50) {                                                          // read instructions while we don't reach end of file
             if (intr && count > 0 && (count % timer) == 0) {
                 intrCount++;
@@ -146,9 +146,10 @@ int main(int argc, char *argv[]) {
             }
             
             write(cpuToMemrory[1], &PC, sizeof(PC));
+            //cout << "PC " << PC << endl;
             read(memoryToCpu [0], &IR, sizeof(IR));
             count++;
-
+            
             switch (IR) {
                 case 1:                                                                     // Load the value into the AC
                     PC++;
@@ -172,8 +173,26 @@ int main(int argc, char *argv[]) {
                     break;
 
                 case 3: // Load the value from the address found in the given address into the AC
-                        // (for example, if LoadInd 500, and 500 contains 100, then load from 100).
+                        // (for example, if LoadInd 500, and 500 contains 100, then load from 100). *********************
                         // WRITE CASE # HERE
+                        PC++;
+                        write(cpuToMemrory[1], &PC, sizeof(PC));
+                        read(memoryToCpu [0], &op, sizeof(op));
+
+                        if (op > 999 && user) {
+                            cout << "Memory violation: accessing system address 1000 in user mode " << endl;
+                        } else {
+                            write(cpuToMemrory[1], &op, sizeof(op));
+                            read(memoryToCpu [0], &op, sizeof(op));
+
+                            if (op > 999 && user)
+                                cout << "Memory violation: accessing system address 1000 in user mode " << endl;
+                            else {
+                                // write(cpuToMemrory[1], &op, sizeof(PC));
+                                // read(memoryToCpu [0], &op, sizeof(op));
+                                AC = op;
+                            }
+                        }
                         break;
 
                 case 4:                                                                     // Load the value at (address+X) into the AC
