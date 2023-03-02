@@ -12,7 +12,7 @@ The sample5.txt is the sample file that I created. The program reads in the text
 To run the program make sure you are in the Project1 directory and then type 
 
 ```
-./main <sample_file_name>.txt <timer_number>
+> ./main <sample_file_name>.txt <timer_number>
 ```
 
 The <sample_file_name> will be either sample1 or sample2 (out of any 5 sample files).
