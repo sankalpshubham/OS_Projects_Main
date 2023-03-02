@@ -1,71 +1,238 @@
-1 // Load 0
-0
-14 // CopyToX
-4 // LoadIdxX 32 (load from A-Z table)
-32
-21 // JumpIfEqual 12
-12
-25 // DecX (decrement X before outputting)
-9 // Put 2 (output as char)
-2
-20 // Jump 3
-3
-1 // Load 0
-0
-16 // CopyToY
-5 // LoadIdxY 59 (load from 1-10 table)
-59
-21 // JumpIfEqual 27
-27
-11 // AddY (increment Y before outputting)
-9 // Put 1 (output as int)
+23      // line 1
+9
+23      // line 2
+24
+23       // line 3
+51
+23       // line 4
+90
+50
+
+// line 1     _______
+1       // load 5 (space count)
+5       // 
+27      // push on stack
+23      // calling spaces method at 580
+580
+28      // pop from stack (get back after printing spaces)
+1       // load underscore count
+7
+27      // push count
+23      // print underscore
+600
+28      // pop
+23      // new line
+560
+24
+
+// line 2 |=|/     /  \
+23      // print '|'
+550
+23      // print '='
+620     
+23      // print '|'
+550
+23      // print '/'
+570     
+1       // load 5 (space count)
+5       // 
+27      // push on stack
+23      // calling spaces method at 580
+580
+28      // pop from stack (get back after printing spaces)
+23      // print '/'
+570
+1       // load 5 (space count)
+2       
+27      // push on stack
+23      // calling spaces method at 580
+580
+28      // pop from stack (get back after printing spaces)
+23      // print '\'
+630  
+23      // new line
+560
+24
+
+// line 3   | |_____|_""_|
+23      // print '|'
+550
+1       // load 1 (space count)
+1       // 
+27      // push on stack
+23      // calling spaces method at 580
+580
+28      // pop from stack (get back after printing spaces)
+23      // print '|'
+550
+1       // load underscore count
+5
+27      // push count
+23      // print underscore
+600
+28      // pop
+23      // print '|'
+550
+1       // load underscore count
 1
-16 // CopyToY
-20 // Jump 15
-15
-1 // Print newline
+27      // push count
+23      // print underscore
+600
+28      // pop
+23      // print ':'
+640
+23      // print ':'
+640
+1       // load underscore count
+1
+27      // push count
+23      // print underscore
+600
+28      // pop
+23      // print '|'
+550
+23      // new line
+560
+24
+
+// line 4  |_|_[X]_|____|
+23      // print '|'
+550
+1       // load underscore count
+1
+27      // push count
+23      // print underscore
+600
+28      // pop
+23      // print '|'
+550
+1       // load underscore count
+1
+27      // push count
+23      // print underscore
+600
+28      // pop
+23      // print '['
+650
+23      // print 'X'
+670
+23      // print ']'
+660
+1       // load underscore count
+1
+27      // push count
+23      // print underscore
+600
+28
+23      // print '|'
+550
+1       // load underscore count
+4
+27      // push count
+23      // print underscore
+600
+28
+23      // print '|'
+550
+24
+
+
+// print variable functions
+
+.600 // print underscore 
+1    ld 1
+1 
+14   CopyToX
+6    LoadSpX  - get parm
+14   CopyToX
+1    ld _
+95
+9    output
+2
+26   decX
+15   CopyFromX
+22   JNE 605
+605
+24
+
+
+.550        // print '|'
+1
+124
+9
+2
+24
+
+
+.560      //print new line
+1
 10
 9
 2
-50 // End
-90 // Data A-Z in reverse order
-89
-88
-87
-86
-85
-84
-83
-82
-81
-80
-79
-78
-77
-76
-75
-74
-73
-72
-71
-70
-69
-68
-67
-66
-65
-0
-10 // Data 0-9 in reverse order
-9
-8
-7
-6
-5
-4
-3
-2
-1
-0
+24
 
-.1000
-30
+
+.570    // print '/'
+1
+47
+9
+2
+24
+
+.580    // print space
+1    ld 1
+1 
+14   CopyToX
+6    LoadSpX  - get parm            
+14   CopyToX
+1    ld ' '         //print space
+32
+9    output
+2
+26   decX        //decrements
+15   CopyFromX        AC = X
+22   JNE 585        jumps 211 if ac != 0
+585
+24
+
+.620    // print '='
+1
+61
+9
+2
+24
+
+.630    // print '\'
+1
+92
+9
+2
+24
+
+.640    // print ':'
+1
+58
+9
+2
+24
+
+.650    // print '['
+1
+91
+9
+2
+24
+
+.660    // print ']'
+1
+93
+9
+2
+24
+
+.670    // print 'X'
+1
+120
+9
+2
+24
