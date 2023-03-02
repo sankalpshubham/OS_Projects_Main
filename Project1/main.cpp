@@ -146,7 +146,6 @@ int main(int argc, char *argv[]) {
             }
             
             write(cpuToMemrory[1], &PC, sizeof(PC));
-            //cout << "PC " << PC << endl;
             read(memoryToCpu [0], &IR, sizeof(IR));
             count++;
             
