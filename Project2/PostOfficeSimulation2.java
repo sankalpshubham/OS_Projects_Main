@@ -7,30 +7,28 @@
 
 import java.util.concurrent.Semaphore;
 
-public class PostOfficeSimulation {
+public class PostOfficeSimulation2 {
 
     // Constants for the number of customers, the maximum number of customers inside the post office at once,
     // and the number of postal workers.
-    private static final int NUM_CUSTOMERS = 50;
-    private static final int MAX_CUSTOMERS_INSIDE = 10;
-    private static final int NUM_POSTAL_WORKERS = 3;
-
     // Semaphores for controlling access to the post office and the scales.
-    private static final Semaphore postOfficeSemaphore = new Semaphore(MAX_CUSTOMERS_INSIDE);
-    private static final Semaphore scalesSemaphore = new Semaphore(1);
+    private static Semaphore customerCount = new Semaphore(50);
+    private static Semaphore customerCapacity = new Semaphore(10);
+    private static Semaphore postalWorker = new Semaphore(3);
+    private static Semaphore scales = new Semaphore(1);
 
     // Task table with times for each task in seconds. (FOR EACH 60 SECs, the thread sleeps for 1 SEC)
     private static final int[] TASK_TIMES = {60, 90, 120};
 
     public static void main(String[] args) {
         // Create and start the postal worker threads.
-        for (int i = 1; i <= NUM_POSTAL_WORKERS; i++) {
+        for (int i = 1; i <= 3; i++) {
             PostalWorker postalWorker = new PostalWorker(i);
             postalWorker.start();
         }
 
         // Create the customer threads and randomly assign them a task.
-        for (int i = 1; i <= NUM_CUSTOMERS; i++) {
+        for (int i = 1; i <= 50; i++) {
             Customer customer = new Customer(i, TASK_TIMES[(int) (Math.random() * TASK_TIMES.length)]);
             customer.start();
         }
