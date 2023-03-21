@@ -1,0 +1,28 @@
+void customer() {
+
+    wait(postOfficeCapacity)
+    enterPostOffice()
+    wait(postal_worker)
+    signal(customer_ready)
+    customer_does_assigned_task()  // customer talks to postal worker. time it needs to sleep for (print done after finishing) (need to include a scale semaphore)
+    wait(finished)
+    signal(leavePostalWorker) // REDUNDANT (EXCLUDE FOR NOW)
+    exit_post_office()
+    signal(postOfficeCapacity)
+
+}
+
+for mailing a package, which uses scale
+in customer:      wait(scale)
+in postal_worker: signal(scale)
+
+void postal_worker() {
+
+    wait(customer_ready)
+    do_customer_task()             // sleep for the task time assined (print done after finishing) (need to include the scale semaphore)
+    signal(finished)
+    wait(leavePostalWorker) // REDUNDANT (EXCLUDE FOR NOW)
+    signal(postal_worker)
+
+}
+
