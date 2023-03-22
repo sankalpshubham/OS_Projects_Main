@@ -1,43 +1,44 @@
-// class HelloWorld {
-//     public static void main(String[] args) {
-//         System.out.println("");
-//         System.out.println("Hello, World!"); 
-//     }
-// }
-
 import java.util.concurrent.Semaphore;
 
 public class PostOfficeSimulation2 {
 
     // Constants for the number of customers, the maximum number of customers inside the post office at once,
     // and the number of postal workers.
-    // Semaphores for controlling access to the post office and the scales.
-    private static Semaphore customerCapacity = new Semaphore(10);
+    // Semaphores for controlling access to the post office, scale, customerReady, postal worker availability, and task finished
+    private static Semaphore customerCapacity = new Semaphore(5);   // NEEDS TO BE 10 *****************
+    private static Semaphore postalWorkerAvailable = new Semaphore(3);
+    private static Semaphore customerReady = new Semaphore(0);
+    private static Semaphore finished = new Semaphore(0);
     private static Semaphore scale = new Semaphore(1);
-
-    // *******************************
-    // Enter Post office is based on customerCapacity semaphore
-    // 
-    //
-    //
-    // *******************************
+    private static Semaphore postalWorkerSem[] = {new Semaphore(1, true), new Semaphore(1, true), new Semaphore(1, true)};
 
     // Task table with times for each task in seconds. (FOR EACH 60 SECs, the thread sleeps for 1 SEC)
     private static final int[] TASK_TIMES = {60, 90, 120};
+    public static int[][] customer_postalWorker_connection = new int[3][3];
 
     public static void main(String[] args) {
         // Create and start the postal worker threads.
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 0; i < 3; i++) {
             PostalWorker postalWorker = new PostalWorker(i);
             postalWorker.start();
         }
 
         // Create the customer threads and randomly assign them a task.
-        for (int i = 1; i <= 50; i++) {
-            int randomTaskTime = TASK_TIMES[(int) (Math.random() * TASK_TIMES.length)];
-            Customer customer = new Customer(i, randomTaskTime);
-            customer.start();
+        Customer[] customer = new Customer[50];
+        for (int i = 0; i < 10; i++) {      // NEEDS TO BE 50 *******************
+            int randomTaskTime = TASK_TIMES[(int) (Math.random() * TASK_TIMES.length)]; // need to send this to postal worker
+            customer[i] = new Customer(i, randomTaskTime);
+            customer[i].start();
         }
+
+        for(int i = 0; i < 10; i++) {       // NEEDS TO BE 50 *******************
+			try {
+				customer[i].join();
+				System.out.println("Joined customer " + i);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
     }
 
     private static class Customer extends Thread {
@@ -54,15 +55,61 @@ public class PostOfficeSimulation2 {
             try {
                 // Acquire a permit to enter the post office.
                 customerCapacity.acquire();
+
                 System.out.println("Customer " + id + " enters post office.");
+
+                // identify which postal worker is serving which one of the customers
+                int postalWorkerID;
+                if (postalWorkerSem[0].tryAcquire()) {
+                    postalWorkerID = 0;
+                } else if (postalWorkerSem[1].tryAcquire()) {
+                    postalWorkerID = 1;
+                } else {
+                    postalWorkerSem[2].tryAcquire();
+                    postalWorkerID = 2;
+                }
+                // assign customer id and the customer assigned task to the postal worker number
+                customer_postalWorker_connection[postalWorkerID][0] = id;
+                customer_postalWorker_connection[postalWorkerID][1] = taskTime;
                 
-                // insert if statement to identify what task it is 
-                // ^ CUSTOMER + id +     ASKS POSTAL WORKER + id +   (insert task [buy a stamp, mail a letter, mail a package])
+                // wait if customer can enter queue to be attended by a postal worker
+                postalWorkerAvailable.acquire();
+                
+                // signal that the customer is ready to be attended
+                customerReady.release();
 
-                // Sleep for the task time.
-                Thread.sleep((taskTime * 1000 / 60));
+                switch (taskTime) {
+                    case 60:                        
+                        // waiting on the postal worker to finish
+                        finished.acquire();
 
-                System.out.println("Customer " + id + " completed task and left post office.");
+                        // buy a stamp
+                        System.out.println("Customer " + id + " asks postal worker " + postalWorkerID + " to buy a stamp");
+
+                        System.out.println("Customer " + id + " finished buying stamps");
+                    case 90:
+                        finished.acquire();
+
+                        // mail a letter
+                        System.out.println("Customer " + id + " asks postal worker " + postalWorkerID + " to mail a letter");
+
+                        System.out.println("Customer " + id + " finished mailing a letter");
+                    case 120:
+                        finished.acquire();
+
+                        // mail a package
+                        System.out.println("Customer " + id + " asks postal worker " + postalWorkerID + " to mail a package");
+
+                        System.out.println("Customer " + id + " finished mailing a package");
+                    default:
+                        // error
+                }
+                
+                System.out.println("Customer " + id + " leaves the post office.");
+
+                // signal the customer leaving
+                customerCapacity.release();
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } finally {
@@ -74,8 +121,6 @@ public class PostOfficeSimulation2 {
 
     private static class PostalWorker extends Thread {
         private final int id;
-        // Get customer id
-        // Get task number
 
         public PostalWorker(int id) {
             this.id = id;
@@ -85,25 +130,48 @@ public class PostOfficeSimulation2 {
         public void run() {
             while (true) {
                 try {
-                    // Acquire a permit to enter the post office.
-                    customerCapacity.acquire();
+                    // waiting for the customer
+                    customerReady.acquire();
 
-                    // Wait for a customer to arrive.
-                    System.out.println("Postal worker " + id + " waiting for customer.");
-                    while (customerCapacity.availablePermits() == 10) {
-                        Thread.sleep(1000);
+                    int customer_id = customer_postalWorker_connection[id][0];
+                    int task_time = customer_postalWorker_connection[id][1];
+
+                    // Serving the customer.
+                    System.out.println("Postal worker " + id + " is serving customer " + customer_id);
+
+                    // NEED THE CUSTOMER id AND task number TO sleep AND DO THE TASK                    
+                    switch (task_time) {
+                        case 60:
+                            // buy a stamp
+                            Thread.sleep((task_time * 1000 / 60));
+                            
+                        case 90:
+                            // mail a letter
+                            Thread.sleep((task_time * 1000 / 60));
+
+                        case 120:
+                            // wait for the scale
+                            scale.acquire();
+                            System.out.println("Scale in use by postal worker " + id);
+
+                            Thread.sleep((task_time * 1000 / 60));
+
+                            // signal finished using the scale
+                            scale.release();
+
+                            System.out.println("Scale released by postal worker " + id);
+                        default:
+                            // error
                     }
 
-                    // Serve the next customer in line.
-                    System.out.println("Postal worker " + id + " serving customer.");           // NEED TO PASS IN A CUSTOMER ID **********
+                    System.out.println("Postal worker " + id + " finished serving customer " + customer_id);
+                    
+                    // finished fulfilling the customer task
+                    finished.release(); 
 
-                    // This is for mailing a package
-                    scale.acquire();
-                    System.out.println("Postal worker " + id + " using scales.");
-                    Thread.sleep(TASK_TIMES[(int) (Math.random() * TASK_TIMES.length)] * 1000);
-                    System.out.println("Postal worker " + id + " finished serving customer.");
-                    scale.release();
-                    // --------------
+                    // signal postal worker is ready for next customer
+                    postalWorkerAvailable.release();
+                    
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } finally {

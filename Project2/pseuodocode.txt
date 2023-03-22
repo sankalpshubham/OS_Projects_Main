@@ -1,3 +1,5 @@
+// ADD THE NEW Semaphore
+
 void customer() {
 
     wait(postOfficeCapacity)
