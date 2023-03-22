@@ -2,10 +2,11 @@ import java.util.concurrent.Semaphore;
 
 public class PostOfficeSimulation2 {
 
-    // Constants for the number of customers, the maximum number of customers inside the post office at once,
-    // and the number of postal workers.
-    // Semaphores for controlling access to the post office, scale, customerReady, postal worker availability, and task finished
-    private static Semaphore customerCapacity = new Semaphore(5);   // NEEDS TO BE 10 *****************
+    /* Constants for the number of customers, the maximum number of customers inside the post office at once,
+    *  the number of postal workers, scale, customerReady, postal worker availability, task finished, and 
+    *  two communication sempahores to specify the order of execution between customer and postal worker thread prints
+    */
+    private static Semaphore customerCapacity = new Semaphore(5);           // NEEDS TO BE 10 *****************
     private static Semaphore postalWorkerAvailable = new Semaphore(3);
     private static Semaphore customerReady = new Semaphore(0);
     private static Semaphore finished = new Semaphore(0);
@@ -82,7 +83,6 @@ public class PostOfficeSimulation2 {
                 // signal that the customer is ready to be attended
                 customerReady.release();
                 thread_communication.acquire();
-                //System.out.println(postalWorkerID + " -------------------------------------------------- CUSTOMER: THIS IS AFTER THREAD COMMUNICATION ---------- ");
 
                 switch (taskTime) {
                     case 60:          
