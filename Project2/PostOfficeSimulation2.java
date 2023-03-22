@@ -11,6 +11,8 @@ public class PostOfficeSimulation2 {
     private static Semaphore finished = new Semaphore(0);
     private static Semaphore scale = new Semaphore(1);
     private static Semaphore postalWorkerSem[] = {new Semaphore(1, true), new Semaphore(1, true), new Semaphore(1, true)};
+    private static Semaphore thread_communication = new Semaphore(0);
+    private static Semaphore thread_communication2 = new Semaphore(0);
 
     // Task table with times for each task in seconds. (FOR EACH 60 SECs, the thread sleeps for 1 SEC)
     private static final int[] TASK_TIMES = {60, 90, 120};
@@ -56,7 +58,7 @@ public class PostOfficeSimulation2 {
                 // Acquire a permit to enter the post office.
                 customerCapacity.acquire();
 
-                System.out.println("Customer " + id + " enters post office.");
+                System.out.println("Customer " + id + " enters post office");
 
                 // identify which postal worker is serving which one of the customers
                 int postalWorkerID;
@@ -77,28 +79,36 @@ public class PostOfficeSimulation2 {
                 
                 // signal that the customer is ready to be attended
                 customerReady.release();
+                thread_communication.acquire();
+                System.out.println(postalWorkerID + " -------------------------------------------------- CUSTOMER: THIS IS AFTER THREAD COMMUNICATION ---------- ");
 
                 switch (taskTime) {
-                    case 60:                        
-                        // waiting on the postal worker to finish
-                        finished.acquire();
-
+                    case 60:          
                         // buy a stamp
                         System.out.println("Customer " + id + " asks postal worker " + postalWorkerID + " to buy a stamp");
 
+                        // waiting on the postal worker to finish
+                        thread_communication2.release();
+                        finished.acquire();
+                        
+
                         System.out.println("Customer " + id + " finished buying stamps");
                     case 90:
-                        finished.acquire();
-
                         // mail a letter
                         System.out.println("Customer " + id + " asks postal worker " + postalWorkerID + " to mail a letter");
 
+                        thread_communication2.release();
+                        finished.acquire();
+                        
+
                         System.out.println("Customer " + id + " finished mailing a letter");
                     case 120:
-                        finished.acquire();
-
                         // mail a package
                         System.out.println("Customer " + id + " asks postal worker " + postalWorkerID + " to mail a package");
+
+                        thread_communication2.release();
+                        finished.acquire();
+                        
 
                         System.out.println("Customer " + id + " finished mailing a package");
                     default:
@@ -124,7 +134,7 @@ public class PostOfficeSimulation2 {
 
         public PostalWorker(int id) {
             this.id = id;
-            System.out.println("Postal worker " + id + " created.");
+            System.out.println("Postal worker " + id + " created");
         }
 
         public void run() {
@@ -138,7 +148,14 @@ public class PostOfficeSimulation2 {
 
                     // Serving the customer.
                     System.out.println("Postal worker " + id + " is serving customer " + customer_id);
+                    thread_communication.release();     // signal for next steps
 
+                    // ACQUIRE HERE PLS
+                    thread_communication2.acquire();    // wait for further steps
+
+                    System.out.println(id + " -------------------------------------------------- POSTAL: THIS IS AFTER THREAD COMMUNICATION ---------- ");
+                    
+                    System.out.println(" -------------------------------------------------- Called by FINSHED SEMAPHORE");
                     // NEED THE CUSTOMER id AND task number TO sleep AND DO THE TASK                    
                     switch (task_time) {
                         case 60:
