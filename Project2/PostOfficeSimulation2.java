@@ -41,6 +41,8 @@ public class PostOfficeSimulation2 {
 				e.printStackTrace();
 			}
 		}
+
+        System.exit(0);
     }
 
     private static class Customer extends Thread {
@@ -70,7 +72,7 @@ public class PostOfficeSimulation2 {
                 } else if (postalWorkerSem[1].tryAcquire()) {
                     postalWorkerID = 1;
                 } else {
-                    postalWorkerSem[2].tryAcquire();
+                    postalWorkerSem[2].acquire();
                     postalWorkerID = 2;
                 }
                 // assign customer id and the customer assigned task to the postal worker number
@@ -93,6 +95,7 @@ public class PostOfficeSimulation2 {
                         
 
                         System.out.println("Customer " + id + " finished buying stamps");
+                        break;
                     case 90:
                         // mail a letter
                         System.out.println("Customer " + id + " asks postal worker " + postalWorkerID + " to mail a letter");
@@ -102,6 +105,7 @@ public class PostOfficeSimulation2 {
                         
 
                         System.out.println("Customer " + id + " finished mailing a letter");
+                        break;
                     case 120:
                         // mail a package
                         System.out.println("Customer " + id + " asks postal worker " + postalWorkerID + " to mail a package");
@@ -111,8 +115,10 @@ public class PostOfficeSimulation2 {
                         
 
                         System.out.println("Customer " + id + " finished mailing a package");
+                        break;
                     default:
                         // error
+                        break;
                 }
                 
                 System.out.println("Customer " + id + " leaves the post office");
@@ -159,11 +165,11 @@ public class PostOfficeSimulation2 {
                         case 60:
                             // buy a stamp
                             Thread.sleep(100);  // NEEDS TO BE 1000 ****
-                            
+                            break;
                         case 90:
                             // mail a letter
                             Thread.sleep(150); // NEEDS TO BE 1500 ****
-
+                            break;
                         case 120:
                             // wait for the scale
                             scale.acquire();
@@ -175,8 +181,10 @@ public class PostOfficeSimulation2 {
                             scale.release();
 
                             System.out.println("Scale released by postal worker " + id);
+                            break;
                         default:
                             // error
+                            break;
                     }
 
                     System.out.println("Postal worker " + id + " finished serving customer " + customer_id);
