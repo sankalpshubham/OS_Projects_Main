@@ -26,7 +26,7 @@ public class PostOfficeSimulation2 {
         }
 
         // Create the customer threads and randomly assign them a task.
-        Customer[] customer = new Customer[50];
+        Customer[] customer = new Customer[10]; // NEEDS TO BE 50 ******************
         for (int i = 0; i < 10; i++) {      // NEEDS TO BE 50 *******************
             int randomTaskTime = TASK_TIMES[(int) (Math.random() * TASK_TIMES.length)]; // need to send this to postal worker
             customer[i] = new Customer(i, randomTaskTime);
@@ -60,6 +60,9 @@ public class PostOfficeSimulation2 {
 
                 System.out.println("Customer " + id + " enters post office");
 
+                // wait if customer can enter queue to be attended by a postal worker
+                postalWorkerAvailable.acquire();
+
                 // identify which postal worker is serving which one of the customers
                 int postalWorkerID;
                 if (postalWorkerSem[0].tryAcquire()) {
@@ -74,13 +77,10 @@ public class PostOfficeSimulation2 {
                 customer_postalWorker_connection[postalWorkerID][0] = id;
                 customer_postalWorker_connection[postalWorkerID][1] = taskTime;
                 
-                // wait if customer can enter queue to be attended by a postal worker
-                postalWorkerAvailable.acquire();
-                
                 // signal that the customer is ready to be attended
                 customerReady.release();
                 thread_communication.acquire();
-                System.out.println(postalWorkerID + " -------------------------------------------------- CUSTOMER: THIS IS AFTER THREAD COMMUNICATION ---------- ");
+                //System.out.println(postalWorkerID + " -------------------------------------------------- CUSTOMER: THIS IS AFTER THREAD COMMUNICATION ---------- ");
 
                 switch (taskTime) {
                     case 60:          
@@ -115,17 +115,15 @@ public class PostOfficeSimulation2 {
                         // error
                 }
                 
-                System.out.println("Customer " + id + " leaves the post office.");
+                System.out.println("Customer " + id + " leaves the post office");
 
                 // signal the customer leaving
                 customerCapacity.release();
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            } finally {
-                // Release the permit for the post office.
-                customerCapacity.release();
             }
+
         }
     }
 
@@ -153,25 +151,25 @@ public class PostOfficeSimulation2 {
                     // ACQUIRE HERE PLS
                     thread_communication2.acquire();    // wait for further steps
 
-                    System.out.println(id + " -------------------------------------------------- POSTAL: THIS IS AFTER THREAD COMMUNICATION ---------- ");
+                    //System.out.println(id + " -------------------------------------------------- POSTAL: THIS IS AFTER THREAD COMMUNICATION ---------- ");
                     
-                    System.out.println(" -------------------------------------------------- Called by FINSHED SEMAPHORE");
+                    //System.out.println(" -------------------------------------------------- Called by FINSHED SEMAPHORE");
                     // NEED THE CUSTOMER id AND task number TO sleep AND DO THE TASK                    
                     switch (task_time) {
                         case 60:
                             // buy a stamp
-                            Thread.sleep((task_time * 1000 / 60));
+                            Thread.sleep(100);  // NEEDS TO BE 1000 ****
                             
                         case 90:
                             // mail a letter
-                            Thread.sleep((task_time * 1000 / 60));
+                            Thread.sleep(150); // NEEDS TO BE 1500 ****
 
                         case 120:
                             // wait for the scale
                             scale.acquire();
                             System.out.println("Scale in use by postal worker " + id);
 
-                            Thread.sleep((task_time * 1000 / 60));
+                            Thread.sleep(200); // NEEDS TO BE 2000 ****
 
                             // signal finished using the scale
                             scale.release();
@@ -187,14 +185,13 @@ public class PostOfficeSimulation2 {
                     finished.release(); 
 
                     // signal postal worker is ready for next customer
+                    postalWorkerSem[id].release();
                     postalWorkerAvailable.release();
                     
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                } finally {
-                    // Release the permit for the post office.
-                    customerCapacity.release();
                 }
+
             }
         }
     }
