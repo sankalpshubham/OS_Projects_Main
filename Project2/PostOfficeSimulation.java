@@ -116,10 +116,6 @@ public class PostOfficeSimulation {
                         
                         System.out.println("Customer " + id + " finished mailing a package");
                         break;
-                    default:
-                        // error
-                        System.out.println("Customer: Error processing task");
-                        break;
                 }
                 
                 System.out.println("Customer " + id + " leaves the post office");
@@ -178,10 +174,6 @@ public class PostOfficeSimulation {
                             scale.release();
 
                             System.out.println("Scale released by postal worker " + id);
-                            break;
-                        default:
-                            // error
-                            System.out.println("Postal Worker: Error processing task");
                             break;
                     }
 

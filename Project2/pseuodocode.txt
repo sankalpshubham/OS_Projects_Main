@@ -1,4 +1,11 @@
-// ADD THE NEW Semaphore
+semaphore postOfficeCapacity = 10;       // keeps track of the max amount of 10 customers inside the post office. 10 threads let in by default
+semaphore postalWorkerAvailable = 3;     // keeps track of one of the 3 postal worker threads are availabile. 3 threads let in default
+semaphore customerReady = 0;             // keeps track of another customer entered the post office and the cusomter thread is ready to be served
+semaphore finished = 0;                  // keeps track of the postal worker thread finsihing the customer assigned task
+semaphore scale = 1;                     // keeps track of the scale in use by the postal worker. 1 thread let in default
+semaphore postalWorkerSem[] = {(1, true), (1, true), (1, true)};     // keeps track of which one of the 3 postal worker threads are in use
+semaphore thread_communication = 0;      // maintains the order of task and print statements of the customer and postal worker threads
+semaphore thread_communication2 = 0;     // maintains the second half of the task and print statements of the threads
 
 void customer() {
 
