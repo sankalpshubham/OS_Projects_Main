@@ -3,28 +3,32 @@
 void customer() {
 
     wait(postOfficeCapacity)
-    enterPostOffice()
-    wait(postal_worker)
-    signal(customer_ready)
+    enter_Post_Office()
+    wait(postalWorkerAvailable)
+    identify_Postal_Worker_ID()
+    wait(postalWorkerSem[id])
+    signal(customerReady)
+    wait(thread_communication)
     customer_does_assigned_task()  // customer talks to postal worker. time it needs to sleep for (print done after finishing) (need to include a scale semaphore)
-    wait(finished)
-    signal(leavePostalWorker) // REDUNDANT (EXCLUDE FOR NOW)
+    signal(thread_communication2)
+    wait(finished)    
     exit_post_office()
     signal(postOfficeCapacity)
 
 }
 
-for mailing a package, which uses scale
-in customer:      wait(scale)
-in postal_worker: signal(scale)
-
 void postal_worker() {
 
-    wait(customer_ready)
+    wait(customerReady)
+    identify_Customer_Task&ID()
+    signal(thread_communication)
+    wait(thread_communication2)
+    wait(scale)                    // wait on scale ONLY for mailing package & if another postal woker is using it
     do_customer_task()             // sleep for the task time assined (print done after finishing) (need to include the scale semaphore)
+    signal(scale)                  // signal scale once finished using it
     signal(finished)
-    wait(leavePostalWorker) // REDUNDANT (EXCLUDE FOR NOW)
-    signal(postal_worker)
+    signal(postalWorkerSem[id])
+    signal(postalWorkerAvailable)
 
 }
 
