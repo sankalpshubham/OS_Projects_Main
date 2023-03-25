@@ -36,14 +36,14 @@ public class PostOfficeSimulation {
         }
 
         // join the threads after completion
-        for(int i = 0; i < 50; i++) {
-			try {
-				customer[i].join();
-				System.out.println("Joined customer " + i);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+        for (int i = 0; i < 50; i++) {
+            try {
+                customer[i].join();
+                System.out.println("Joined customer " + i);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         System.exit(0);
     }
